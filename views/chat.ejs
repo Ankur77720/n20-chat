@@ -11,16 +11,36 @@
 <body>
     <main>
 
-        <div class="chat-box bg-gray-100 p-4 rounded-lg shadow-lg">
-            <div class="conversation-area h-64 overflow-y-auto mb-4 p-2 bg-white rounded-lg shadow-inner"></div>
-            <div class="input-field flex">
-                <input
-                    type="text"
-                    class="flex-grow p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <section class="flex gap-2">
+
+            <div class="chats flex flex-col gap-4">
+                <% onlineUsers.forEach(onlineUser=>{ %>
+                <div
+                    onclick="selectChat('<%= onlineUser.socketId %>')"
+                    class="chat flex items-center gap-4 p-4 bg-white rounded-lg shadow-md"
                 >
-                <button class="bg-blue-500 text-white p-2 rounded-r-lg hover:bg-blue-600">Send</button>
+                    <img
+                        src="<%= onlineUser.image %>"
+                        alt="User Avatar"
+                        class="w-12 h-12 rounded-full"
+                    >
+                    <h1 class="text-lg font-semibold"><%= onlineUser.displayName %></h1>
+                </div>
+                <% }) %>
             </div>
-        </div>
+
+            <div class="chat-box bg-gray-100 p-4 rounded-lg shadow-lg">
+                <div class="conversation-area h-64 overflow-y-auto mb-4 p-2 bg-white rounded-lg shadow-inner"></div>
+                <div class="input-field flex">
+                    <input
+                        type="text"
+                        class="flex-grow p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <button class="bg-blue-500 text-white p-2 rounded-r-lg hover:bg-blue-600">Send</button>
+                </div>
+            </div>
+
+        </section>
 
     </main>
 
@@ -31,7 +51,28 @@
 
         const socket = io();
 
+        let receiverId = '';
+
         socket.emit('join', user._id)
+
+        function selectChat(socketId) {
+            console.log(socketId)
+            receiverId = socketId;
+        }
+
+
+        document.querySelector('button').addEventListener('click', () => {
+            const message = document.querySelector('input').value;
+
+            socket.emit('message', {
+                receiverId,
+                message
+            })
+        })
+
+        socket.on('message', (data) => {
+            console.log(data)
+        })
 
     </script>
 </body>

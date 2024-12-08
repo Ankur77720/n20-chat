@@ -87,10 +87,20 @@ app.get('/chat', async (req, res) => {
 
     const loggedInUser = await userModel.findOne({ email: req.user.emails[ 0 ].value });
 
-    console.log(loggedInUser);
+    const onlineUsers = await userModel.find({
+        socketId: {
+            $ne: null
+        },
+        _id: {
+            $ne: loggedInUser._id
+        }
+    })
+
+
 
     res.render('chat', {
-        user: loggedInUser
+        user: loggedInUser,
+        onlineUsers
     });
 })
 
@@ -124,6 +134,12 @@ io.on('connection', socket => {
             socketId: null
         })
 
+    })
+
+    socket.on('message', messageObject => {
+        socket
+        .to(messageObject.receiverId)
+        .emit('message', messageObject)
     })
 
 });
